@@ -2,13 +2,16 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
 const airportController = require("../controllers/airportController");
+const { verifyTokenAdmin } = require("../middlewares/authMiddleware");
 
 router.post("/signin", adminController.signIn);
-router.patch("/toggleblock/:id", adminController.toggleBlock);
 
-router.post("/addairport", airportController.addAirport);
-router.get("/airports", airportController.getAirports);
+router.get("/users", verifyTokenAdmin, adminController.getUsers);
+router.patch("/toggleblock/:id", verifyTokenAdmin, adminController.toggleBlock);
+
+router.post("/addairport", verifyTokenAdmin, airportController.addAirport);
+router.get("/airports", verifyTokenAdmin, airportController.getAirports);
 router.put("/:airportId", airportController.updateAirport);
-router.delete("/:airportId", airportController.deleteAirport);
+router.delete("/:airportId", verifyTokenAdmin, airportController.deleteAirport);
 
 module.exports = router;

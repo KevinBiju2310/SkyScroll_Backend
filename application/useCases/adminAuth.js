@@ -14,7 +14,12 @@ const signInUseCase = async (userdata) => {
   if (admin.role !== "admin") {
     throw new Error("Unauthorized. You are not an admin");
   }
-  return { message: "Admin SignIn successfull", admin: admin };
+  return admin;
+};
+
+const getUsersUseCase = async () => {
+  const users = await userRepositary.getAllUsers();
+  return users;
 };
 
 const toggleBlockUseCase = async (userId) => {
@@ -22,7 +27,7 @@ const toggleBlockUseCase = async (userId) => {
   if (!user) {
     throw new Error("User not found");
   }
-  user.isVerified = !user.isVerified;
+  user.isBlocked = !user.isBlocked;
   await user.save();
   return { message: "User block status changed" };
 };
@@ -30,4 +35,5 @@ const toggleBlockUseCase = async (userId) => {
 module.exports = {
   signInUseCase,
   toggleBlockUseCase,
+  getUsersUseCase,
 };

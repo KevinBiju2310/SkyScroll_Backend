@@ -22,6 +22,9 @@ const signInUseCase = async (userdata) => {
   if (!user || !passwordMatch) {
     throw new Error("Incorrect Email or password");
   }
+  if(user.isBlocked){
+    throw new Error("User is Blocked")
+  }
   return user;
 };
 

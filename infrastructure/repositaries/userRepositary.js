@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "admin", "airline"],
       default: "user",
     },
-    isVerified: {
+    isBlocked: {
       type: Boolean,
       default: false,
     },
@@ -76,10 +76,15 @@ const updateUserProfile = async (id, data) => {
   return await userModel.findByIdAndUpdate(id, { $set: data });
 };
 
+const getAllUsers = async () => {
+  return await userModel.find({ role: "user" });
+};
+
 module.exports = {
   createUser,
   findByEmail,
   findById,
   profileDetail,
-  updateUserProfile
+  updateUserProfile,
+  getAllUsers,
 };
