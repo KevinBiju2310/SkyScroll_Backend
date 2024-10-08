@@ -2,7 +2,9 @@ const {
   signUpUseCase,
   signInUseCase,
   profileDetailsUseCase,
-  updateProfileUseCase
+  updateProfileUseCase,
+  verifyOtpUseCase,
+  resendOtpUseCase,
 } = require("../../application/useCases/userAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
@@ -70,7 +72,7 @@ const updateProfile = async (req, res) => {
     const updatedUser = req.body;
     console.log(updatedUser.phone);
     console.log(updatedUser.dateofbirth);
-    
+
     const response = await updateProfileUseCase(userId, updatedUser);
     res.status(201).json({ success: true, data: response });
   } catch (error) {
@@ -78,19 +80,33 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// const verifyOtp = async (req, res) => {
-//   try {
-//     const { phone, otp } = req.body;
-//     const response = await verifyOtpUseCase(phone, otp);
-//     res.status(200).json({ message: response.message });
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// };
+const verifyOtp = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+    const response = await verifyOtpUseCase(userId, otp);
+    res
+      .status(200)
+      .json({ success: true, message: "OTP verified successfully!", response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const resendOtp = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const response = await resendOtpUseCase(userId);
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
 
 module.exports = {
   signUp,
   signIn,
   profileDetails,
   updateProfile,
+  verifyOtp,
+  resendOtp,
 };

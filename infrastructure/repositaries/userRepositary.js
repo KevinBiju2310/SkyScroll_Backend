@@ -17,12 +17,22 @@ const UserSchema = new mongoose.Schema(
     dateOfBirth: {
       type: Date,
     },
+    otp:{
+      type: Number
+    },
+    otpExpire:{
+      type: Date
+    },
     role: {
       type: String,
       enum: ["user", "admin", "airline"],
       default: "user",
     },
     isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+    isVerified: {
       type: Boolean,
       default: false,
     },
@@ -80,6 +90,11 @@ const getAllUsers = async () => {
   return await userModel.find({ role: "user" });
 };
 
+
+const deleteUser = async (id) => {
+  return await userModel.findByIdAndDelete(id)
+}
+
 module.exports = {
   createUser,
   findByEmail,
@@ -87,4 +102,5 @@ module.exports = {
   profileDetail,
   updateUserProfile,
   getAllUsers,
+  deleteUser
 };

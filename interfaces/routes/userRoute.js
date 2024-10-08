@@ -7,6 +7,7 @@ router.post("/register", userController.signUp);
 router.post("/signin", userController.signIn);
 router.get("/profile", verifyToken, userController.profileDetails);
 router.put("/profile", verifyToken, userController.updateProfile);
-// router.post('/verify-otp', userController.verifyOtp);
+router.post("/verify-otp", userController.verifyOtp);
+router.post("/resend-otp", userController.resendOtp)
 
 module.exports = router;
