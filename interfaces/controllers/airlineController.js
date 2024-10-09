@@ -1,42 +1,19 @@
-const { registerUseCase } = require("../../application/useCases/airlineAuth");
+const {
+  registerAirlineUseCase,
+} = require("../../application/useCases/airlineAuth");
+// const uploadToCloudinary = require("../../infrastructure/utils/fileUpload");
+// const cloudinary = require("../../infrastructure/services/cloudinaryConfig");
+// const cloudinary = require("cloudinary").v2;
 
 const registerAirline = async (req, res) => {
   try {
-    // Extract text fields and file paths from req.body
-    const {
-      airlineName,
-      iataCode,
-      airlineWebsite,
-      country,
-      username,
-      email,
-      designation,
-    } = req.body;
-    console.log(airlineName);
-
-    const licenseDoc = req.body.licenseDoc;
-    const insuranceDoc = req.body.insuranceDoc;
-
-    const airlineData = {
-      airlineName,
-      iataCode,
-      airlineWebsite,
-      country,
-      username,
-      email,
-      designation,
-      licenseDoc, // PDF or Image of Airline License
-      insuranceDoc, // PDF or Image of Insurance Certificate
-    };
-    console.log(airlineData);
-    // Call the use case to handle the registration
-    const response = await registerUseCase(airlineData);
-
-    // Send success response back to client
-    res.status(201).json(response);
+    const response = await registerAirlineUseCase(req.body, req.files);
+    console.log(response);
+    
+    res.status(200).json({ response });
   } catch (error) {
-    // Handle any errors (e.g., file upload issues, validation errors, etc.)
-    res.status(400).json({ error: error.message });
+    console.error("Error registering company:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 

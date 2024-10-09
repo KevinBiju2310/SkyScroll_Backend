@@ -1,18 +1,19 @@
 const cloudinary = require("../services/cloudinaryConfig");
-const fs = require("fs");
+// const fs = require("fs");
 
-const Upload = async (filePath, folderName) => {
+const uploadToCloudinary = async (file, filename) => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: folderName,
-      resource_type: "auto",
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: "airline_docs",
+      public_id: filename,
+      use_filename: true,
+      unique_filename: false,
     });
-    fs.unlinkSync(filePath);
-    console.log(result.secure_url);
     return result.secure_url;
   } catch (error) {
-    throw new Error("Failed to upload file to Cloudinary: " + error.message);
+    console.error("Error uploading to Cloudinary:", error);
+    throw error;
   }
 };
 
-module.exports = Upload;
+module.exports = uploadToCloudinary;
