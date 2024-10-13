@@ -2,9 +2,9 @@ const airportRepositary = require("../../infrastructure/repositaries/airportRepo
 
 const addAirportUseCase = async (airportData) => {
   const { name } = airportData;
-  console.log(name)
+  console.log(name);
   const existingAirport = await airportRepositary.findByName(name);
-  console.log(existingAirport,"ex")
+  console.log(existingAirport, "ex");
   if (existingAirport) {
     throw new Error("Airport Already exists");
   }
@@ -14,6 +14,10 @@ const addAirportUseCase = async (airportData) => {
 
 const getAirportsUseCase = async () => {
   return await airportRepositary.getAllAirports();
+};
+
+const getSingleAirportUseCase = async (airportId) => {
+  return await airportRepositary.findById(airportId);
 };
 
 const updateAirportUseCase = async (airportId, airportData) => {
@@ -33,4 +37,5 @@ module.exports = {
   getAirportsUseCase,
   updateAirportUseCase,
   deleteAirportUseCase,
+  getSingleAirportUseCase,
 };

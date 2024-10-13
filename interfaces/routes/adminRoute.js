@@ -18,7 +18,12 @@ router.patch(
 
 router.post("/addairport", verifyTokenAdmin, airportController.addAirport);
 router.get("/airports", verifyTokenAdmin, airportController.getAirports);
-router.put("/:airportId", airportController.updateAirport);
+router.get(
+  "/airports/:id",
+  verifyTokenAdmin,
+  airportController.getSingleAirport
+);
+router.put("/airports/:id", verifyTokenAdmin, airportController.updateAirport);
 router.delete("/:airportId", verifyTokenAdmin, airportController.deleteAirport);
 
 module.exports = router;
