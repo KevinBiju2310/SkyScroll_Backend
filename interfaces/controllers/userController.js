@@ -5,6 +5,8 @@ const {
   updateProfileUseCase,
   verifyOtpUseCase,
   resendOtpUseCase,
+  googleSignUpUseCase,
+  googleSignInUseCase,
 } = require("../../application/useCases/userAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
@@ -102,6 +104,54 @@ const resendOtp = async (req, res) => {
   }
 };
 
+const googleSignUp = async (req, res) => {
+  try {
+    const response = await googleSignUpUseCase(req.body);
+    res.status(201).json({ success: true, data: response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const googleSignIn = async (req, res) => {
+  try {
+    const response = await googleSignInUseCase(req.body);
+    const accessToken = jwt.sign(
+      { userId: response.id },
+      process.env.ACCESS_TOKEN,
+      {
+        expiresIn: "15m",
+      }
+    );
+    const refreshToken = jwt.sign(
+      { userId: response.id },
+      process.env.REFRESH_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+    console.log(accessToken);
+    console.log(refreshToken);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.status(201).json({ success: true, data: response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -109,4 +159,6 @@ module.exports = {
   updateProfile,
   verifyOtp,
   resendOtp,
+  googleSignUp,
+  googleSignIn,
 };

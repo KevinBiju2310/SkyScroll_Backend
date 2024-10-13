@@ -2,6 +2,8 @@ const {
   signInUseCase,
   toggleBlockUseCase,
   getUsersUseCase,
+  getAirlineUseCase,
+  toggleAirlineStatusUseCase
 } = require("../../application/useCases/adminAuth");
 const jwt = require("jsonwebtoken");
 
@@ -65,8 +67,30 @@ const toggleBlock = async (req, res) => {
   }
 };
 
+const getAirlines = async (req, res) => {
+  try {
+    const response = await getAirlineUseCase();
+    console.log(response, "All Airlines");
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const toggleAirlineStatus = async (req, res) => {
+  try {
+    const airlineId = req.params.id;
+    const response = await toggleAirlineStatusUseCase(airlineId);
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   signIn,
   toggleBlock,
   getUsers,
+  getAirlines,
+  toggleAirlineStatus,
 };

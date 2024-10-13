@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
 const sendEmail = require("../../infrastructure/services/otpService");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signUpUseCase = async (userdata) => {
   const { email, password } = userdata;
@@ -31,6 +33,7 @@ const signInUseCase = async (userdata) => {
   if (user.isBlocked) {
     throw new Error("User is Blocked");
   }
+
   return user;
 };
 
@@ -52,23 +55,19 @@ const verifyOtpUseCase = async (userId, otp) => {
   }
 
   const currentTime = new Date().getTime();
-  
-  // Check if OTP has expired
+
   if (!user.otpExpire || currentTime > new Date(user.otpExpire).getTime()) {
-    user.otp = null; // Clear the OTP if it has expired
+    user.otp = null;
     user.otpExpire = null;
     await user.save();
     throw new Error("OTP expired. Please request a new one.");
   }
 
-  otp = Number(otp); // Ensure OTP is a number
+  otp = Number(otp);
 
-  // Check if the provided OTP matches
   if (user.otp !== otp) {
     throw new Error("Invalid OTP. Please try again.");
   }
-
-  // OTP is valid, mark user as verified and clear the OTP and expiration
   user.isVerified = true;
   user.otp = null;
   user.otpExpire = null;
@@ -77,8 +76,6 @@ const verifyOtpUseCase = async (userId, otp) => {
   return user;
 };
 
-
-
 const resendOtpUseCase = async (userId) => {
   const user = await userRepositary.findById(userId);
 
@@ -86,24 +83,49 @@ const resendOtpUseCase = async (userId) => {
     throw new Error("User not found");
   }
 
-  // Generate a new OTP and set a new expiration time (e.g., 60 seconds from now)
-  const newOtp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-  const otpExpire = new Date(new Date().getTime() + 60 * 1000); // 60 seconds from now
+  const newOtp = Math.floor(100000 + Math.random() * 900000);
+  const otpExpire = new Date(new Date().getTime() + 60 * 1000);
 
   user.otp = newOtp;
   user.otpExpire = otpExpire;
   await user.save();
-
-  // Send OTP to user (via email/SMS)
-  // ...
-
   return "New OTP sent successfully";
 };
 
+const googleSignUpUseCase = async (googleDetails) => {
+  const { token } = googleDetails;
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const { email, name } = payload;
+  const existingUser = await userRepositary.findByEmail(email);
+  if (existingUser) {
+    throw new Error("Email already in use.");
+  }
+  user = { username: name, email, googleUser: true };
+  const saveUser = await userRepositary.createUser(user);
+  return saveUser;
+};
 
-
-
-
+const googleSignInUseCase = async (googleDetails) => {
+  const { token } = googleDetails;
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const { email } = payload;
+  const user = await userRepositary.findByEmail(email);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  if (user.isBlocked) {
+    throw new Error("User is Blocked");
+  }
+  return user;
+};
 
 module.exports = {
   signUpUseCase,
@@ -111,5 +133,7 @@ module.exports = {
   profileDetailsUseCase,
   updateProfileUseCase,
   verifyOtpUseCase,
-  resendOtpUseCase
+  resendOtpUseCase,
+  googleSignUpUseCase,
+  googleSignInUseCase,
 };

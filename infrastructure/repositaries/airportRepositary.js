@@ -54,6 +54,10 @@ const getAllAirports = async () => {
   return await airportModel.find();
 };
 
+const findByName = async (name) => {
+  return await airportModel.findOne({ name });
+};
+
 const updateAirport = async (airportId, airportData) => {
   return await airportModel.findByIdAndUpdate(airportId, airportData);
 };
@@ -67,4 +71,5 @@ module.exports = {
   getAllAirports,
   updateAirport,
   deleteAirport,
+  findByName,
 };

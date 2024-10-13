@@ -1,6 +1,13 @@
 const airportRepositary = require("../../infrastructure/repositaries/airportRepositary");
 
 const addAirportUseCase = async (airportData) => {
+  const { name } = airportData;
+  console.log(name)
+  const existingAirport = await airportRepositary.findByName(name);
+  console.log(existingAirport,"ex")
+  if (existingAirport) {
+    throw new Error("Airport Already exists");
+  }
   const newAirport = await airportRepositary.createAirport(airportData);
   return { message: "Airport added successfully", airport: newAirport };
 };

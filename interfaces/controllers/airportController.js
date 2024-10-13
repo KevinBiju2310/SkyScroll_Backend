@@ -7,7 +7,7 @@ const {
 
 const addAirport = async (req, res) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     const response = await addAirportUseCase(req.body);
     res.status(201).json({ response });
   } catch (error) {

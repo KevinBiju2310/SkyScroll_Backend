@@ -1,5 +1,26 @@
 const mongoose = require("mongoose");
 
+const PassportSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+  },
+  lastName: {
+    type: String,
+  },
+  dateOfBirth: {
+    type: Date,
+  },
+  nationality: {
+    type: String,
+  },
+  passportNumber: {
+    type: String,
+  },
+  expiryDate: {
+    type: Date,
+  },
+});
+
 const UserSchema = new mongoose.Schema(
   {
     username: {
@@ -17,11 +38,11 @@ const UserSchema = new mongoose.Schema(
     dateOfBirth: {
       type: Date,
     },
-    otp:{
-      type: Number
+    otp: {
+      type: Number,
     },
-    otpExpire:{
-      type: Date
+    otpExpire: {
+      type: Date,
     },
     role: {
       type: String,
@@ -57,6 +78,11 @@ const UserSchema = new mongoose.Schema(
     insuranceDocument: {
       type: String,
     },
+    googleUser: {
+      type: Boolean,
+      default: false,
+    },
+    passportDetails: PassportSchema,
   },
   {
     timestamps: true,
@@ -90,10 +116,13 @@ const getAllUsers = async () => {
   return await userModel.find({ role: "user" });
 };
 
-
 const deleteUser = async (id) => {
-  return await userModel.findByIdAndDelete(id)
-}
+  return await userModel.findByIdAndDelete(id);
+};
+
+const getAllAirlines = async () => {
+  return await userModel.find({ role: "airline" });
+};
 
 module.exports = {
   createUser,
@@ -102,5 +131,6 @@ module.exports = {
   profileDetail,
   updateUserProfile,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  getAllAirlines,
 };
