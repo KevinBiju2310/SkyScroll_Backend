@@ -124,13 +124,18 @@ const getAllAirlines = async () => {
   return await userModel.find({ role: "airline" });
 };
 
+const save = async (user) => {
+  return await user.save();
+};
+
 module.exports = {
   createUser,
   findByEmail,
   findById,
   profileDetail,
-  updateUserProfile,
+  updateUserProfile,  
   getAllUsers,
   deleteUser,
   getAllAirlines,
+  save,
 };

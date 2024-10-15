@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
 const sendEmail = require("../../infrastructure/services/otpService");
 const { OAuth2Client } = require("google-auth-library");
@@ -127,6 +128,38 @@ const googleSignInUseCase = async (googleDetails) => {
   return user;
 };
 
+const forgotPasswordUseCase = async (emailDetails) => {
+  const { email } = emailDetails;
+  const user = await userRepositary.findByEmail(email);
+  console.log(user.email, "user case");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const resetToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+  console.log(resetToken);
+  const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
+  const subject = "Password Reset Request";
+  const message = `You are receiving this email because you (or someone else) have requested a password reset for your account. Please click on the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`;
+  await sendEmail(user.email, subject, message);
+  console.log(resetLink, "Reset-link");
+  return { message: "Password reset link sent to email" };
+};
+
+const resetPasswordUseCase = async (passwordDetails) => {
+  const { token, newPassword } = passwordDetails;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await userRepositary.findByEmail(decoded.email);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  await userRepositary.save(user);
+  return { message: "Password updated successfully" };
+};
+
 module.exports = {
   signUpUseCase,
   signInUseCase,
@@ -136,4 +169,6 @@ module.exports = {
   resendOtpUseCase,
   googleSignUpUseCase,
   googleSignInUseCase,
+  forgotPasswordUseCase,
+  resetPasswordUseCase,
 };
