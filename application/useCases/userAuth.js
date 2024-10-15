@@ -135,10 +135,12 @@ const forgotPasswordUseCase = async (emailDetails) => {
   if (!user) {
     throw new Error("User not found");
   }
+  if (user.role === "airline" && !user.isVerified) {
+    throw new Error("Only verified airline users can reset their password.");
+  }
   const resetToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  console.log(resetToken);
   const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
   const subject = "Password Reset Request";
   const message = `You are receiving this email because you (or someone else) have requested a password reset for your account. Please click on the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`;
