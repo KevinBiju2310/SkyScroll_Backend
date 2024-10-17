@@ -17,5 +17,9 @@ router.post("/resend-otp", userController.resendOtp);
 
 router.post("/forgot-password", userController.forgotPassword);
 router.post("/reset-password", userController.resetPassword);
+router.post("/change-password", verifyToken, userController.changePassword);
+
+router.get("/other-travellers", verifyToken, userController.getAllTravellers);
+router.post("/other-travellers", verifyToken, userController.addTravellers);
 
 module.exports = router;

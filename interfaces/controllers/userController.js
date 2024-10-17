@@ -9,6 +9,9 @@ const {
   googleSignInUseCase,
   forgotPasswordUseCase,
   resetPasswordUseCase,
+  changePasswordUseCase,
+  addTravellersUseCase,
+  getAllTravellersUseCase,
 } = require("../../application/useCases/userAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
@@ -173,6 +176,36 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const passwords = req.body;
+    const response = await changePasswordUseCase(userId, passwords);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const addTravellers = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await addTravellersUseCase(userId, req.body);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getAllTravellers = async (req, res) => {
+  try {
+    const response = await getAllTravellersUseCase();
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -184,4 +217,7 @@ module.exports = {
   googleSignIn,
   forgotPassword,
   resetPassword,
+  changePassword,
+  addTravellers,
+  getAllTravellers,
 };

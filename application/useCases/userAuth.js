@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
+const travellersRepositary = require("../../infrastructure/repositaries/travellersRepositary");
 const sendEmail = require("../../infrastructure/services/otpService");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -162,6 +163,43 @@ const resetPasswordUseCase = async (passwordDetails) => {
   return { message: "Password updated successfully" };
 };
 
+const changePasswordUseCase = async (id, passwords) => {
+  const { currentPassword, newPassword } = passwords;
+  const user = await userRepositary.findById(id);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!passwordMatch) {
+    throw new Error("Current Password is incorrect");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  await userRepositary.save(user);
+  return { message: "Password successfully changed" };
+};
+
+const addTravellersUseCase = async (userId, travellerDetails) => {
+  const { passportNumber } = travellerDetails;
+  const existingPassportNumber =
+    await travellersRepositary.findByPassportNumber(passportNumber);
+  if (existingPassportNumber) {
+    throw new Error("Passport Number is Incorrect");
+  }
+  travellerDetails.userId = userId;
+  const createTraveller =
+    travellersRepositary.createTraveller(travellerDetails);
+  const saveTraveller = await travellersRepositary.saveTraveller(
+    createTraveller
+  );
+  return { message: "Traveller created successfully", saveTraveller };
+};
+
+const getAllTravellersUseCase = async () => {
+  const travellers = await travellersRepositary.getAllTravellers();
+  return travellers;
+};
+
 module.exports = {
   signUpUseCase,
   signInUseCase,
@@ -173,4 +211,7 @@ module.exports = {
   googleSignInUseCase,
   forgotPasswordUseCase,
   resetPasswordUseCase,
+  changePasswordUseCase,
+  addTravellersUseCase,
+  getAllTravellersUseCase,
 };
