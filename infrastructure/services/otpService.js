@@ -1,6 +1,8 @@
 const nodemailer = require("nodemailer");
+const otpEmailTemplate = require("../utils/otpEmailTemplate");
+const passwordResetEmailTemplate = require("../utils/passwordResetEmailTemplate");
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, type, data) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -9,13 +11,20 @@ const sendEmail = async (to, subject, text) => {
     },
   });
 
+  let htmlContent;
+  if (type === "otp") {
+    htmlContent = otpEmailTemplate(data);
+  } else if (type === "passwordReset") {
+    htmlContent = passwordResetEmailTemplate(data);
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text,
+    html: htmlContent,
   };
-  console.log(mailOptions)
+
   await transporter.sendMail(mailOptions);
 };
 

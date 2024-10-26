@@ -12,6 +12,7 @@ const {
   changePasswordUseCase,
   addTravellersUseCase,
   getAllTravellersUseCase,
+  updatePassportUseCase,
 } = require("../../application/useCases/userAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
@@ -19,6 +20,7 @@ const jwt = require("jsonwebtoken");
 const signUp = async (req, res) => {
   try {
     const response = await signUpUseCase(req.body);
+    console.log(response);
     res.status(201).json({ success: true, data: response });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -49,7 +51,7 @@ const signIn = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 1 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -77,10 +79,20 @@ const updateProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
     const updatedUser = req.body;
-    console.log(updatedUser.phone);
-    console.log(updatedUser.dateofbirth);
-
     const response = await updateProfileUseCase(userId, updatedUser);
+    res.status(201).json({ success: true, data: response });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const updatePassport = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const updatedPassport = req.body;
+    console.log(updatedPassport, "coming");
+    const response = await updatePassportUseCase(userId, updatedPassport);
+    console.log(response, "from front");
     res.status(201).json({ success: true, data: response });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -206,11 +218,36 @@ const getAllTravellers = async (req, res) => {
   }
 };
 
+const getAccessToken = (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(403).json({ message: "Refresh token not found" });
+  }
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+    const newAccessToken = jwt.sign(
+      { userId: user.userId },
+      process.env.ACCESS_TOKEN,
+      { expiresIn: "1d" }
+    );
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+    });
+    res.status(200).json({ message: "Access token refreshed" });
+  });
+};
+
 module.exports = {
   signUp,
   signIn,
   profileDetails,
   updateProfile,
+  updatePassport,
   verifyOtp,
   resendOtp,
   googleSignUp,
@@ -220,4 +257,5 @@ module.exports = {
   changePassword,
   addTravellers,
   getAllTravellers,
+  getAccessToken,
 };

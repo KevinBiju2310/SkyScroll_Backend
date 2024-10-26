@@ -109,7 +109,7 @@ const profileDetail = async () => {
 };
 
 const updateUserProfile = async (id, data) => {
-  return await userModel.findByIdAndUpdate(id, { $set: data });
+  return await userModel.findByIdAndUpdate(id, { $set: data }, { new: true });
 };
 
 const getAllUsers = async () => {
@@ -133,7 +133,7 @@ module.exports = {
   findByEmail,
   findById,
   profileDetail,
-  updateUserProfile,  
+  updateUserProfile,
   getAllUsers,
   deleteUser,
   getAllAirlines,

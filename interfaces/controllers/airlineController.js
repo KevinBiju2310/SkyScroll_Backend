@@ -1,30 +1,29 @@
 const {
   registerAirlineUseCase,
   loginUseCase,
+  updateProfileUseCase,
+  changePasswordUseCase,
 } = require("../../application/useCases/airlineAuth");
 const jwt = require("jsonwebtoken");
 
 const registerAirline = async (req, res) => {
   try {
     const response = await registerAirlineUseCase(req.body, req.files);
-    console.log(response);
-
     res.status(200).json({ response });
   } catch (error) {
-    console.error("Error registering company:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
 const login = async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const response = await loginUseCase(req.body);
     const accessToken = jwt.sign(
       { userId: response.id, role: response.role },
       process.env.ACCESS_TOKEN,
       {
-        expiresIn: "15m",
+        expiresIn: "1d",
       }
     );
     const refreshToken = jwt.sign(
@@ -41,7 +40,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -57,7 +56,31 @@ const login = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const airlineId = req.user.userId;
+    const updateAirline = req.body;
+    const response = await updateProfileUseCase(airlineId, updateAirline);
+    res.status(201).json({ success: true, data: response });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const passwords = req.body;
+    const response = await changePasswordUseCase(userId, passwords);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   registerAirline,
   login,
+  updateProfile,
+  changePassword,
 };

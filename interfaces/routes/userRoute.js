@@ -11,6 +11,7 @@ router.post("/signin-google", userController.googleSignIn);
 
 // router.get("/profile", verifyToken, userController.profileDetails);
 router.put("/profile", verifyToken, userController.updateProfile);
+router.put("/passport", verifyToken, userController.updatePassport);
 // router.put("/profile/passport",verifyToken,userController.updatePassport);
 router.post("/verify-otp", userController.verifyOtp);
 router.post("/resend-otp", userController.resendOtp);
@@ -21,5 +22,12 @@ router.post("/change-password", verifyToken, userController.changePassword);
 
 router.get("/other-travellers", verifyToken, userController.getAllTravellers);
 router.post("/other-travellers", verifyToken, userController.addTravellers);
+
+
+
+
+
+
+router.post("/refresh-token", userController.getAccessToken);
 
 module.exports = router;

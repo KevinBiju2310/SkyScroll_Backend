@@ -3,7 +3,6 @@ const userRepositary = require("../../infrastructure/repositaries/userRepositary
 const uploadToCloudinary = require("../../infrastructure/utils/fileUpload");
 
 const registerAirlineUseCase = async (airlineData, airlineFiles) => {
-  // console.log(airlineData, airlineFiles, "from back");
   const { airlineName } = airlineData;
   let airlineLicenseUrl = null;
   let insuranceCertificateUrl = null;
@@ -59,7 +58,34 @@ const loginUseCase = async (loginData) => {
   return airline;
 };
 
+const updateProfileUseCase = async (airlineId, profileDetails) => {
+  const updateAirlineProfile = await userRepositary.updateUserProfile(
+    airlineId,
+    profileDetails
+  );
+  console.log(updateAirlineProfile, "backend");
+  return updateAirlineProfile;
+};
+
+const changePasswordUseCase = async (airlineId, passwords) => {
+  const { currentPassword, newPassword } = passwords;
+  const airline = await userRepositary.findById(airlineId);
+  if (!airline) {
+    throw new Error("Airline not found");
+  }
+  const passwordMatch = await bcrypt.compare(currentPassword, airline.password);
+  if (!passwordMatch) {
+    throw new Error("Current Password is incorrect");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  airline.password = hashedPassword;
+  await userRepositary.save(airline);
+  return { message: "Password successfully changed" };
+};
+
 module.exports = {
   registerAirlineUseCase,
   loginUseCase,
+  updateProfileUseCase,
+  changePasswordUseCase,
 };

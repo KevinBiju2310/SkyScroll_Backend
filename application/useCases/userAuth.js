@@ -20,7 +20,7 @@ const signUpUseCase = async (userdata) => {
   saveUser.otp = otp;
   saveUser.otpExpire = otpExpire;
   await saveUser.save();
-  await sendEmail(saveUser.email, "Your OTP Code", `Your otp is ${otp}`);
+  await sendEmail(saveUser.email, "Your OTP Code", "otp", otp);
   console.log(otp);
   return saveUser;
 };
@@ -47,6 +47,32 @@ const profileDetailsUseCase = async (id) => {
 const updateProfileUseCase = async (id, updatedData) => {
   const updatedUser = await userRepositary.updateUserProfile(id, updatedData);
   return updatedUser;
+};
+
+const updatePassportUseCase = async (id, updatedData) => {
+  const user = await userRepositary.findById(id);
+  console.log(user, "user-data");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const updatedPassportDetails = {
+    passportDetails: {
+      firstName: updatedData.firstName || user.passportDetails?.firstName,
+      lastName: updatedData.lastName || user.passportDetails?.lastName,
+      dateOfBirth: updatedData.dateOfBirth || user.passportDetails?.dateOfBirth,
+      nationality: updatedData.nationality || user.passportDetails?.nationality,
+      passportNumber:
+        updatedData.passportNumber || user.passportDetails?.passportNumber,
+      expiryDate: updatedData.expiryDate || user.passportDetails?.expiryDate,
+    },
+  };
+  console.log(updatedPassportDetails);
+  const updatedPassport = await userRepositary.updateUserProfile(
+    id,
+    updatedPassportDetails
+  );
+  console.log(updatedPassport, "passport-dta");
+  return updatedPassport;
 };
 
 const verifyOtpUseCase = async (userId, otp) => {
@@ -143,9 +169,12 @@ const forgotPasswordUseCase = async (emailDetails) => {
     expiresIn: "1h",
   });
   const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
-  const subject = "Password Reset Request";
-  const message = `You are receiving this email because you (or someone else) have requested a password reset for your account. Please click on the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`;
-  await sendEmail(user.email, subject, message);
+  await sendEmail(
+    user.email,
+    "Password Reset Request",
+    "passwordReset",
+    resetLink
+  );
   console.log(resetLink, "Reset-link");
   return { message: "Password reset link sent to email" };
 };
@@ -205,6 +234,7 @@ module.exports = {
   signInUseCase,
   profileDetailsUseCase,
   updateProfileUseCase,
+  updatePassportUseCase,
   verifyOtpUseCase,
   resendOtpUseCase,
   googleSignUpUseCase,

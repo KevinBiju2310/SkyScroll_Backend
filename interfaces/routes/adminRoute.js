@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
 const airportController = require("../controllers/airportController");
+const aircraftController = require("../controllers/aircraftController");
 const { verifyTokenAdmin } = require("../middlewares/authMiddleware");
 
 router.post("/signin", adminController.signIn);
@@ -25,5 +26,8 @@ router.get(
 );
 router.put("/airports/:id", verifyTokenAdmin, airportController.updateAirport);
 router.delete("/:airportId", verifyTokenAdmin, airportController.deleteAirport);
+
+router.get("/aircrafts", verifyTokenAdmin, aircraftController.getAircraftsAdmin);
+router.patch("/aircrafts/:id", verifyTokenAdmin, aircraftController.updateAircraftStatus);
 
 module.exports = router;
