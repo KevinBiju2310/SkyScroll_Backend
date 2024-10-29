@@ -18,7 +18,8 @@ const addAircraft = async (req, res) => {
 
 const getAllAircrafts = async (req, res) => {
   try {
-    const response = await getAircraftUseCase();
+    const userId = req.user.userId
+    const response = await getAircraftUseCase(userId);
     res.status(200).json({ success: true, response });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

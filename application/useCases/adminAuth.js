@@ -57,6 +57,7 @@ const toggleAirlineStatusUseCase = async (airlineId) => {
   await airline.save();
   if (airline.isVerified && !airline.password) {
     const randomPassword = generateRandomPassword();
+    console.log(randomPassword,"password")
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
     airline.password = hashedPassword;
     await airline.save();

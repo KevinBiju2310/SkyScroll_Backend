@@ -1,4 +1,5 @@
 const aircraftRepositary = require("../../infrastructure/repositaries/aircraftRepositary");
+const userRepositary = require("../../infrastructure/repositaries/userRepositary");
 const uploadToCloudinary = require("../../infrastructure/utils/fileUpload");
 // const { updateAircraftStatus } = require("../../interfaces/controllers/aircraftController");
 
@@ -42,8 +43,12 @@ const addAircraftUseCase = async (aircraftData, aircraftFiles, airlineId) => {
   }
 };
 
-const getAircraftUseCase = async () => {
-  const allAircrafts = await aircraftRepositary.findAllAircrafts();
+const getAircraftUseCase = async (id) => {
+  const airlineId = await userRepositary.findById(id);
+  if(!airlineId){
+    throw new Error("Airline not found");
+  }
+  const allAircrafts = await aircraftRepositary.findAllAircrafts(id);
   return allAircrafts;
 };
 

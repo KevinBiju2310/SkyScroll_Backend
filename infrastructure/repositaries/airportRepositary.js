@@ -36,6 +36,9 @@ const AirportSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  timezone: {
+    type: String,
+  },
   longitude: {
     type: Number,
     required: true,
@@ -60,7 +63,11 @@ const findByName = async (name) => {
 
 const findById = async (id) => {
   return await airportModel.findById(id);
-}
+};
+
+const findByCode = async (code) => {
+  return await airportModel.findOne({ code });
+};
 
 const updateAirport = async (airportId, airportData) => {
   return await airportModel.findByIdAndUpdate(airportId, airportData);
@@ -76,5 +83,6 @@ module.exports = {
   updateAirport,
   deleteAirport,
   findByName,
-  findById
+  findById,
+  findByCode,
 };

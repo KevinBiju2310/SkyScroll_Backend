@@ -105,8 +105,8 @@ const createAircraft = async (aircraft) => {
   return await newAircraft.save();
 };
 
-const findAllAircrafts = async () => {
-  return await aircraftModel.find();
+const findAllAircrafts = async (id) => {
+  return await aircraftModel.find({ airline: id });
 };
 
 const deleteAircraft = async (id) => {
@@ -121,6 +121,10 @@ const findById = async (id) => {
   return await aircraftModel.findById(id);
 };
 
+const findByModel = async (model) => {
+  return await aircraftModel.findOne({ aircraftModel: model });
+};
+
 const save = async (aircraft) => {
   return await aircraft.save();
 };
@@ -132,4 +136,5 @@ module.exports = {
   findAllAircraftsAdmin,
   findById,
   save,
+  findByModel,
 };

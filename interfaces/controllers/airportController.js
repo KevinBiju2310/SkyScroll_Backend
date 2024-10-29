@@ -59,6 +59,7 @@ const deleteAirport = async (req, res) => {
   }
 };
 
+
 module.exports = {
   addAirport,
   getAirports,
