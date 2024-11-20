@@ -60,6 +60,9 @@ const UserSchema = new mongoose.Schema(
     airlineName: {
       type: String,
     },
+    profilepic: {
+      type: String,
+    },
     iataCode: {
       type: String,
     },
@@ -128,6 +131,22 @@ const save = async (user) => {
   return await user.save();
 };
 
+const uploadLogo = async (id, logoDetail) => {
+  return await userModel.findByIdAndUpdate(
+    id,
+    { profilepic: logoDetail.profilepic },
+    { new: true }
+  );
+};
+
+const countUsers = async () => {
+  return await userModel.countDocuments({ role: "user" });
+};
+
+const countAirlines = async () => {
+  return await userModel.countDocuments({ role: "airline" });
+};
+
 module.exports = {
   createUser,
   findByEmail,
@@ -138,4 +157,7 @@ module.exports = {
   deleteUser,
   getAllAirlines,
   save,
+  uploadLogo,
+  countAirlines,
+  countUsers,
 };

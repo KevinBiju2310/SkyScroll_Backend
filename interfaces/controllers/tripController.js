@@ -1,7 +1,10 @@
 const {
   addTripUseCase,
   getAllTripsUseCase,
-  deleteTripUseCase
+  deleteTripUseCase,
+  flightDetailsUseCase,
+  createBookingUseCase,
+  getAllBookingsUseCase
 } = require("../../application/useCases/tripAuth");
 
 const addTrips = async (req, res) => {
@@ -35,8 +38,39 @@ const deleteTrips = async (req, res) => {
   }
 };
 
+const getFlights = async (req, res) => {
+  try {
+    const response = await flightDetailsUseCase(req.params);
+    res.status(200).json({ response });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const createBooking = async (req, res) => {
+  try {
+    const response = await createBookingUseCase(req.body);
+    res.status(200).json({ response });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const getBooking = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await getAllBookingsUseCase(userId);
+    res.status(200).json({ response });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   addTrips,
   getAllTrips,
   deleteTrips,
+  getFlights,
+  createBooking,
+  getBooking,
 };

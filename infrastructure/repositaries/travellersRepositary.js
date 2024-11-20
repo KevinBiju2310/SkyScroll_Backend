@@ -48,8 +48,8 @@ const saveTraveller = async (traveller) => {
   return await traveller.save();
 };
 
-const getAllTravellers = async () => {
-  return await travellersModel.find();
+const getAllTravellers = async (id) => {
+  return await travellersModel.find({ userId: id });
 };
 
 module.exports = {

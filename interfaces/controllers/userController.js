@@ -14,6 +14,10 @@ const {
   getAllTravellersUseCase,
   updatePassportUseCase,
 } = require("../../application/useCases/userAuth");
+const {
+  getAirportsUseCase,
+} = require("../../application/useCases/airportAuth");
+const { getFlightsUseCase, paymentsUseCase } = require("../../application/useCases/tripAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
 
@@ -211,7 +215,8 @@ const addTravellers = async (req, res) => {
 
 const getAllTravellers = async (req, res) => {
   try {
-    const response = await getAllTravellersUseCase();
+    const id = req.user.userId;
+    const response = await getAllTravellersUseCase(id);
     res.status(201).json({ success: true, response });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -242,6 +247,34 @@ const getAccessToken = (req, res) => {
   });
 };
 
+const getAirports = async (req, res) => {
+  try {
+    const response = await getAirportsUseCase();
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const searchFlight = async (req, res) => {
+  try {
+    const response = await getFlightsUseCase(req.query);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const Payments = async (req, res) => {
+  try {
+    console.log(req.body);
+    const response = await paymentsUseCase(req.body);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -258,4 +291,7 @@ module.exports = {
   addTravellers,
   getAllTravellers,
   getAccessToken,
+  getAirports,
+  searchFlight,
+  Payments,
 };

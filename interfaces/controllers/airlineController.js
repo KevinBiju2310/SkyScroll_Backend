@@ -3,6 +3,9 @@ const {
   loginUseCase,
   updateProfileUseCase,
   changePasswordUseCase,
+  getAllBookingsUseCase,
+  uploadLogoUseCase,
+  bookingStatusUseCase,
 } = require("../../application/useCases/airlineAuth");
 const jwt = require("jsonwebtoken");
 
@@ -78,9 +81,44 @@ const changePassword = async (req, res) => {
   }
 };
 
+const uploadLogo = async (req, res) => {
+  try {
+    const airlineId = req.user.userId;
+    const response = await uploadLogoUseCase(req.files.logo, airlineId);
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getBookings = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await getAllBookingsUseCase(userId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const changeBookingStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    // console.log(id, status);
+    const response = await bookingStatusUseCase(id, status);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   registerAirline,
   login,
   updateProfile,
   changePassword,
+  getBookings,
+  uploadLogo,
+  changeBookingStatus,
 };

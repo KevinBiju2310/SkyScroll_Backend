@@ -45,7 +45,7 @@ const addAircraftUseCase = async (aircraftData, aircraftFiles, airlineId) => {
 
 const getAircraftUseCase = async (id) => {
   const airlineId = await userRepositary.findById(id);
-  if(!airlineId){
+  if (!airlineId) {
     throw new Error("Airline not found");
   }
   const allAircrafts = await aircraftRepositary.findAllAircrafts(id);
@@ -75,10 +75,31 @@ const updateAircraftStatusUseCase = async (id, approvalStatus) => {
   return updatedAircraft;
 };
 
+const addSeatsUseCase = async (id, details) => {
+  const { classType, seats } = details;
+  const aircraft = await aircraftRepositary.findById(id);
+  if (!aircraft) {
+    throw new Error("Aircraft Not found");
+  }
+  const classIndex = aircraft.seatingDetails.findIndex(
+    (detail) => detail.class === classType
+  );
+  if (classIndex === -1) {
+    throw new Error(`Class ${classType} not found`);
+  }
+  const updatedSeats = seats.map((seat) => ({
+    ...seat,
+    status: "available",
+  }));
+  aircraft.seatingDetails[classIndex].seats = updatedSeats;
+  await aircraft.save();
+};
+
 module.exports = {
   addAircraftUseCase,
   getAircraftUseCase,
   deleteAircraftUseCase,
   adminAircraftsUseCase,
   updateAircraftStatusUseCase,
+  addSeatsUseCase,
 };

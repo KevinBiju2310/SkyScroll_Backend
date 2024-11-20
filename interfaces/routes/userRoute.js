@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
+const tripController = require("../controllers/tripController");
 const { verifyToken } = require("../middlewares/authMiddleware");
 
 router.post("/register", userController.signUp);
@@ -23,10 +24,14 @@ router.post("/change-password", verifyToken, userController.changePassword);
 router.get("/other-travellers", verifyToken, userController.getAllTravellers);
 router.post("/other-travellers", verifyToken, userController.addTravellers);
 
+router.get("/airports", userController.getAirports);
+router.get("/search-flight", userController.searchFlight);
+router.get("/flight/:id", tripController.getFlights);
 
+router.post("/create-payment-intent", verifyToken, userController.Payments);
+router.post("/create-booking", verifyToken, tripController.createBooking);
 
-
-
+router.get("/bookings", verifyToken, tripController.getBooking);
 
 router.post("/refresh-token", userController.getAccessToken);
 

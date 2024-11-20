@@ -3,7 +3,10 @@ const {
   toggleBlockUseCase,
   getUsersUseCase,
   getAirlineUseCase,
-  toggleAirlineStatusUseCase
+  toggleAirlineStatusUseCase,
+  getAllBookingsUseCase,
+  getAllTripsUseCase,
+  getDashboardDetailsUseCase
 } = require("../../application/useCases/adminAuth");
 const jwt = require("jsonwebtoken");
 
@@ -15,7 +18,7 @@ const signIn = async (req, res) => {
       { userId: response.id, role: response.role },
       process.env.ACCESS_TOKEN,
       {
-        expiresIn: "15m",
+        expiresIn: "1d",
       }
     );
     const refreshToken = jwt.sign(
@@ -32,7 +35,7 @@ const signIn = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -87,10 +90,40 @@ const toggleAirlineStatus = async (req, res) => {
   }
 };
 
+const getAllBookings = async (req, res) => {
+  try {
+    const response = await getAllBookingsUseCase();
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getAllTrips = async (req, res) => {
+  try {
+    const response = await getAllTripsUseCase();
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getDashboardDetails = async(req,res) => {
+  try{
+    const response = await getDashboardDetailsUseCase();
+    res.status(200).json({success:true, response})
+  }catch(error){
+    res.status(400).json({success:false, error:error.message})
+  }
+}
+
 module.exports = {
   signIn,
   toggleBlock,
   getUsers,
   getAirlines,
   toggleAirlineStatus,
+  getAllBookings,
+  getAllTrips,
+  getDashboardDetails
 };

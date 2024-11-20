@@ -22,8 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   fileUpload({
-    useTempFiles: true, // Important for Cloudinary uploads
-    tempFileDir: "/tmp/", // Temporary directory for file uploads
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
   })
 );
 

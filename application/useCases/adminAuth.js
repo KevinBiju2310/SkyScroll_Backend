@@ -1,5 +1,8 @@
 const bcrypt = require("bcryptjs");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
+const bookingRepositary = require("../../infrastructure/repositaries/bookingRepositary");
+const tripRepositary = require("../../infrastructure/repositaries/tripRepositary");
+const airportRepositary = require("../../infrastructure/repositaries/airportRepositary");
 const sendEmail = require("../../infrastructure/services/otpService");
 
 const generateRandomPassword = () => {
@@ -57,7 +60,7 @@ const toggleAirlineStatusUseCase = async (airlineId) => {
   await airline.save();
   if (airline.isVerified && !airline.password) {
     const randomPassword = generateRandomPassword();
-    console.log(randomPassword,"password")
+    console.log(randomPassword, "password");
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
     airline.password = hashedPassword;
     await airline.save();
@@ -70,10 +73,41 @@ const toggleAirlineStatusUseCase = async (airlineId) => {
   return { message: "airline Status Changed" };
 };
 
+const getAllBookingsUseCase = async () => {
+  const allBookings = await bookingRepositary.findAllBookingsAdmin();
+  return allBookings;
+};
+
+const getAllTripsUseCase = async () => {
+  const allTrips = await tripRepositary.findAllTripsAdmin();
+  return allTrips;
+};
+
+const getDashboardDetailsUseCase = async () => {
+  const userCount = await userRepositary.countUsers();
+  const airlineCount = await userRepositary.countAirlines();
+  const airportCount = await airportRepositary.countAirports();
+  const revenueResult = await bookingRepositary.revenueCalculate();
+  const totalRevenue = revenueResult[0]?.totalRevenue || 0;
+
+  const monthlyRevenue = await bookingRepositary.getMonthlyRevenue();
+  // console.log(monthlyData)
+  return {
+    totalUsers: userCount,
+    totalAirlines: airlineCount,
+    totalAirports: airportCount,
+    totalRevenue: totalRevenue,
+    monthlyData: monthlyRevenue,
+  };
+};
+
 module.exports = {
   signInUseCase,
   toggleBlockUseCase,
   getUsersUseCase,
   getAirlineUseCase,
   toggleAirlineStatusUseCase,
+  getAllBookingsUseCase,
+  getAllTripsUseCase,
+  getDashboardDetailsUseCase,
 };

@@ -1,0 +1,199 @@
+const mongoose = require("mongoose");
+
+const bookingSchema = new mongoose.Schema(
+  {
+    flightId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Trip",
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["SUCCESS", "FAILED", "PENDING"],
+      default: "PENDING",
+    },
+    bookingStatus: {
+      type: String,
+      enum: ["CONFIRMED", "CANCELLED", "PENDING"],
+      default: "PENDING",
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
+    travelClass: {
+      type: String,
+      required: true,
+    },
+    selectedSeats: {
+      type: Map,
+      of: [String],
+    },
+    passengers: [
+      {
+        fullName: {
+          type: String,
+          required: true,
+        },
+        gender: {
+          type: String,
+          required: true,
+        },
+        nationality: {
+          type: String,
+          required: true,
+        },
+        dateOfBirth: {
+          type: Date,
+          required: true,
+        },
+        passportNumber: {
+          type: String,
+          required: true,
+        },
+        passengerType: {
+          type: String,
+          enum: ["ADULT", "CHILD"],
+          required: true,
+        },
+      },
+    ],
+    contactInfo: {
+      email: {
+        type: String,
+        required: true,
+      },
+      phoneNumber: {
+        type: Number,
+        required: true,
+      },
+    },
+    bookingDate: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const bookingModel = mongoose.model("Booking", bookingSchema);
+
+const createBooking = async (data) => {
+  const newBooking = new bookingModel(data);
+  return await newBooking.save();
+};
+
+const findByUserId = async (id) => {
+  return await bookingModel.find({ userId: id }).populate({
+    path: "flightId",
+    populate: [
+      {
+        path: "segments.departureAirport",
+        model: "Airport",
+      },
+      {
+        path: "segments.arrivalAirport",
+        model: "Airport",
+      },
+      {
+        path: "segments.aircraft",
+        model: "Aircraft",
+      },
+      {
+        path: "airline",
+        model: "User",
+      },
+    ],
+  });
+};
+
+const findBookingsByTripId = async (id) => {
+  return await bookingModel.find({ flightId: id }).populate({
+    path: "flightId",
+    populate: [
+      {
+        path: "segments.departureAirport segments.arrivalAirport",
+        model: "Airport",
+      },
+    ],
+  });
+};
+
+const findAllBookingsAdmin = async () => {
+  return await bookingModel.find().populate([
+    {
+      path: "flightId",
+      populate: [
+        {
+          path: "segments.departureAirport segments.arrivalAirport",
+          model: "Airport",
+        },
+        {
+          path: "airline",
+          model: "User",
+        },
+      ],
+    },
+    {
+      path: "userId",
+      model: "User",
+    },
+  ]);
+};
+
+const changeStatus = async (id, status) => {
+  return await bookingModel.findByIdAndUpdate(
+    id,
+    { bookingStatus: status },
+    { new: true }
+  );
+};
+
+const revenueCalculate = async () => {
+  return await bookingModel.aggregate([
+    { $group: { _id: null, totalRevenue: { $sum: "$totalAmount" } } },
+  ]);
+};
+
+const getMonthlyRevenue = async () => {
+  return await bookingModel.aggregate([
+    {
+      $group: {
+        _id: {
+          month: { $month: "$bookingDate" },
+          year: { $year: "$bookingDate" },
+        },
+        revenue: { $sum: "$totalAmount" },
+        users: { $addToSet: "$userId" },
+        airlines: { $addToSet: "$flightId" },
+      },
+    },
+    {
+      $project: {
+        month: "$_id.month",
+        year: "$_id.year",
+        revenue: 1,
+        userCount: { $size: "$users" },
+        airlineCount: { $size: "$airlines" },
+      },
+    },
+    { $sort: { year: 1, month: 1 } },
+  ]);
+};
+
+module.exports = {
+  createBooking,
+  findByUserId,
+  findBookingsByTripId,
+  findAllBookingsAdmin,
+  changeStatus,
+  revenueCalculate,
+  getMonthlyRevenue,
+};

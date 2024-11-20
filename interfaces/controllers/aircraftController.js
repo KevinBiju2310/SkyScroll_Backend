@@ -4,6 +4,7 @@ const {
   deleteAircraftUseCase,
   adminAircraftsUseCase,
   updateAircraftStatusUseCase,
+  addSeatsUseCase
 } = require("../../application/useCases/aircraftAuth");
 
 const addAircraft = async (req, res) => {
@@ -18,7 +19,7 @@ const addAircraft = async (req, res) => {
 
 const getAllAircrafts = async (req, res) => {
   try {
-    const userId = req.user.userId
+    const userId = req.user.userId;
     const response = await getAircraftUseCase(userId);
     res.status(200).json({ success: true, response });
   } catch (error) {
@@ -59,10 +60,21 @@ const updateAircraftStatus = async (req, res) => {
   }
 };
 
+const addSeats = async (req, res) => {
+  try {
+    const aircraftId = req.params.id;
+    const response = await addSeatsUseCase(aircraftId, req.body);
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   addAircraft,
   getAllAircrafts,
   deleteAircraft,
   getAircraftsAdmin,
   updateAircraftStatus,
+  addSeats,
 };

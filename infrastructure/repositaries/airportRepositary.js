@@ -77,6 +77,10 @@ const deleteAirport = async (airportId) => {
   await airportModel.findByIdAndDelete(airportId);
 };
 
+const countAirports = async () => {
+  return await airportModel.countDocuments();
+};
+
 module.exports = {
   createAirport,
   getAllAirports,
@@ -85,4 +89,5 @@ module.exports = {
   findByName,
   findById,
   findByCode,
+  countAirports,
 };

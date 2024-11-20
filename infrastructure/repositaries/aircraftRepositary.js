@@ -1,5 +1,11 @@
 const mongoose = require("mongoose");
 
+const SeatSchema = new mongoose.Schema({
+  seatNumber: String,
+  type: String,
+  status: String,
+});
+
 const seatingDetailsSchema = new mongoose.Schema({
   class: {
     type: String,
@@ -26,6 +32,7 @@ const seatingDetailsSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  seats: [SeatSchema],
 });
 
 const AircraftSchema = new mongoose.Schema(
@@ -70,7 +77,15 @@ const AircraftSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    seatLayout: {
+    rows: {
+      type: String,
+      required: true,
+    },
+    columns: {
+      type: String,
+      required: true,
+    },
+    aisles: {
       type: String,
       required: true,
     },

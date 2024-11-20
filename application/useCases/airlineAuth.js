@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
+const tripRepositary = require("../../infrastructure/repositaries/tripRepositary");
+const bookingRepositary = require("../../infrastructure/repositaries/bookingRepositary");
 const uploadToCloudinary = require("../../infrastructure/utils/fileUpload");
 
 const registerAirlineUseCase = async (airlineData, airlineFiles) => {
@@ -67,6 +69,22 @@ const updateProfileUseCase = async (airlineId, profileDetails) => {
   return updateAirlineProfile;
 };
 
+const uploadLogoUseCase = async (logo, id) => {
+  const airline = await userRepositary.findById(id);
+  let airlineLogoUrl = null;
+  if (logo) {
+    airlineLogoUrl = await uploadToCloudinary(
+      logo,
+      `logo_${airline.airlineName}`
+    );
+  }
+  console.log(airlineLogoUrl);
+  const saveLogo = await userRepositary.uploadLogo(id, {
+    profilepic: airlineLogoUrl,
+  });
+  return saveLogo;
+};
+
 const changePasswordUseCase = async (airlineId, passwords) => {
   const { currentPassword, newPassword } = passwords;
   const airline = await userRepositary.findById(airlineId);
@@ -83,9 +101,24 @@ const changePasswordUseCase = async (airlineId, passwords) => {
   return { message: "Password successfully changed" };
 };
 
+const getAllBookingsUseCase = async (id) => {
+  const trips = await tripRepositary.findAllTrips(id);
+  const tripIds = trips.map((trip) => trip._id);
+  const bookings = await bookingRepositary.findBookingsByTripId(tripIds);
+  return bookings;
+};
+
+const bookingStatusUseCase = async (id, status) => {
+  const updatedBooking = await bookingRepositary.changeStatus(id, status);
+  return updatedBooking;
+};
+
 module.exports = {
   registerAirlineUseCase,
   loginUseCase,
   updateProfileUseCase,
   changePasswordUseCase,
+  getAllBookingsUseCase,
+  uploadLogoUseCase,
+  bookingStatusUseCase,
 };

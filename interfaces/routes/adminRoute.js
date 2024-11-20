@@ -30,4 +30,10 @@ router.delete("/:airportId", verifyTokenAdmin, airportController.deleteAirport);
 router.get("/aircrafts", verifyTokenAdmin, aircraftController.getAircraftsAdmin);
 router.patch("/aircrafts/:id", verifyTokenAdmin, aircraftController.updateAircraftStatus);
 
+router.get("/trips", verifyTokenAdmin, adminController.getAllTrips);
+router.get("/bookings", verifyTokenAdmin, adminController.getAllBookings);
+
+router.get("/dashboard", verifyTokenAdmin, adminController.getDashboardDetails);
+
+
 module.exports = router;

@@ -224,8 +224,8 @@ const addTravellersUseCase = async (userId, travellerDetails) => {
   return { message: "Traveller created successfully", saveTraveller };
 };
 
-const getAllTravellersUseCase = async () => {
-  const travellers = await travellersRepositary.getAllTravellers();
+const getAllTravellersUseCase = async (id) => {
+  const travellers = await travellersRepositary.getAllTravellers(id);
   return travellers;
 };
 
