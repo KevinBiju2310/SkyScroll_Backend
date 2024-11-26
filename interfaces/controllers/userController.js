@@ -13,11 +13,18 @@ const {
   addTravellersUseCase,
   getAllTravellersUseCase,
   updatePassportUseCase,
+  getBookedAirlinesUseCase,
+  cancelBookingUseCase,
+  walletDetailsUseCase,
+  messageUseCase,
 } = require("../../application/useCases/userAuth");
 const {
   getAirportsUseCase,
 } = require("../../application/useCases/airportAuth");
-const { getFlightsUseCase, paymentsUseCase } = require("../../application/useCases/tripAuth");
+const {
+  getFlightsUseCase,
+  paymentsUseCase,
+} = require("../../application/useCases/tripAuth");
 // const verifyOtpUseCase = require("../../application/useCases/userAuth");
 const jwt = require("jsonwebtoken");
 
@@ -275,6 +282,47 @@ const Payments = async (req, res) => {
   }
 };
 
+const getBookedAirlines = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await getBookedAirlinesUseCase(userId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await cancelBookingUseCase(id);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const walletDetails = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await walletDetailsUseCase(userId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getMessages = async (req, res) => {
+  try {
+    const senderId = req.user.userId;
+    const receiverId = req.params.id;
+    const response = await messageUseCase(senderId, receiverId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status.json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -294,4 +342,8 @@ module.exports = {
   getAirports,
   searchFlight,
   Payments,
+  getBookedAirlines,
+  cancelBooking,
+  walletDetails,
+  getMessages,
 };

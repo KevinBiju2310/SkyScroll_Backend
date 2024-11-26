@@ -6,6 +6,8 @@ const {
   getAllBookingsUseCase,
   uploadLogoUseCase,
   bookingStatusUseCase,
+  bookedUsersUseCase,
+  statisticsUseCase,
 } = require("../../application/useCases/airlineAuth");
 const jwt = require("jsonwebtoken");
 
@@ -113,6 +115,26 @@ const changeBookingStatus = async (req, res) => {
   }
 };
 
+const getBookedUsers = async (req, res) => {
+  try {
+    const airlineId = req.user.userId;
+    const response = await bookedUsersUseCase(airlineId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+const getStatistics = async (req, res) => {
+  try {
+    const airlineId = req.user.userId;
+    const response = await statisticsUseCase(airlineId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   registerAirline,
   login,
@@ -121,4 +143,6 @@ module.exports = {
   getBookings,
   uploadLogo,
   changeBookingStatus,
+  getBookedUsers,
+  getStatistics,
 };

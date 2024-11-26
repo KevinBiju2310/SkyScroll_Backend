@@ -32,6 +32,11 @@ router.post("/create-payment-intent", verifyToken, userController.Payments);
 router.post("/create-booking", verifyToken, tripController.createBooking);
 
 router.get("/bookings", verifyToken, tripController.getBooking);
+router.get("/booked-airlines", verifyToken, userController.getBookedAirlines);
+router.put("/cancelbooking/:id", verifyToken, userController.cancelBooking);
+
+router.get("/wallet", verifyToken, userController.walletDetails);
+router.get("/messages/:id", verifyToken, userController.getMessages);
 
 router.post("/refresh-token", userController.getAccessToken);
 

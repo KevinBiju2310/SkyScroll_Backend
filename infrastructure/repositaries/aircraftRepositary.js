@@ -144,6 +144,10 @@ const save = async (aircraft) => {
   return await aircraft.save();
 };
 
+const countAircraftByAirline = async (id) => {
+  return await aircraftModel.countDocuments({ airline: id });
+};
+
 module.exports = {
   createAircraft,
   findAllAircrafts,
@@ -152,4 +156,5 @@ module.exports = {
   findById,
   save,
   findByModel,
+  countAircraftByAirline,
 };

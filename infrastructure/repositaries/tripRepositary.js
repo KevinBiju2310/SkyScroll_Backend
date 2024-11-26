@@ -120,7 +120,7 @@ const deleteTrip = async (id) => {
   return await tripModel.findByIdAndDelete(id);
 };
 
-const findAllTripsUser = async (filters = {}) => {
+const findAllTripsUser = async (filters) => {
   return await tripModel
     .find(filters)
     .populate("segments.departureAirport")
@@ -138,6 +138,14 @@ const findAllTripsAdmin = async () => {
     .populate("airline");
 };
 
+const findTripsByAirlineId = async (id) => {
+  return await tripModel.find({ airline: id }).select("_id");
+};
+
+const countTripsByAirline = async (id) => {
+  return await tripModel.countDocuments({ airline: id });
+};
+
 module.exports = {
   createTrip,
   findAllTrips,
@@ -145,4 +153,6 @@ module.exports = {
   findAllTripsUser,
   findById,
   findAllTripsAdmin,
+  findTripsByAirlineId,
+  countTripsByAirline,
 };

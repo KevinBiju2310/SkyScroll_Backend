@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
 const tripRepositary = require("../../infrastructure/repositaries/tripRepositary");
 const bookingRepositary = require("../../infrastructure/repositaries/bookingRepositary");
+const aircraftRepositary = require("../../infrastructure/repositaries/aircraftRepositary");
 const uploadToCloudinary = require("../../infrastructure/utils/fileUpload");
 
 const registerAirlineUseCase = async (airlineData, airlineFiles) => {
@@ -113,6 +114,21 @@ const bookingStatusUseCase = async (id, status) => {
   return updatedBooking;
 };
 
+const bookedUsersUseCase = async (id) => {
+  const trips = await tripRepositary.findTripsByAirlineId(id);
+  const tripIds = trips.map((trip) => trip._id);
+  const bookings = await bookingRepositary.findUserIdByTripId(tripIds);
+  const user = bookings.map((booking) => booking.userId);
+  return user;
+};
+
+const statisticsUseCase = async (id) => {
+  const totalAircraft = await aircraftRepositary.countAircraftByAirline(id);  
+  const totalBookings = await bookingRepositary.countBookingsByAirline(id);
+  const totalTrips = await tripRepositary.countTripsByAirline(id);
+  return { totalAircraft, totalBookings, totalTrips };
+};
+
 module.exports = {
   registerAirlineUseCase,
   loginUseCase,
@@ -121,4 +137,6 @@ module.exports = {
   getAllBookingsUseCase,
   uploadLogoUseCase,
   bookingStatusUseCase,
+  bookedUsersUseCase,
+  statisticsUseCase,
 };

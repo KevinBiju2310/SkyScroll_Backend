@@ -14,7 +14,7 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["SUCCESS", "FAILED", "PENDING"],
+      enum: ["SUCCESS", "FAILED", "REFUNDED", "PENDING"],
       default: "PENDING",
     },
     bookingStatus: {
@@ -188,6 +188,59 @@ const getMonthlyRevenue = async () => {
   ]);
 };
 
+const findBookedAirlines = async (id) => {
+  return await bookingModel.find({ userId: id }).populate({
+    path: "flightId",
+    populate: [
+      {
+        path: "airline",
+        model: "User",
+      },
+    ],
+  });
+};
+
+const findUserIdByTripId = async (id) => {
+  return await bookingModel.find({ flightId: { $in: id } }).populate("userId");
+};
+
+const findById = async (id) => {
+  return await bookingModel.findById(id);
+};
+
+const saveBooking = async (data) => {
+  const updatedBooking = await data.save();
+  return updatedBooking;
+};
+
+const countBookingsByAirline = async(id) => {
+  return await bookingModel.aggregate([
+    {
+      $lookup:{
+        from: "trips",
+        localField: "flightId",
+        foreignField: "_id",
+        as:"flight"
+      }
+    },
+    {
+      $unwind: "$flight"
+    },
+    {
+      $match: {
+        "flight.airline": new mongoose.Types.ObjectId(id)
+      }
+    },
+    {
+      $count: "totalBookings"
+    }
+  ]).then(result=>{
+    if(result.length===0) return 0;
+    return result[0].totalBookings;
+  })
+}
+
+
 module.exports = {
   createBooking,
   findByUserId,
@@ -196,4 +249,9 @@ module.exports = {
   changeStatus,
   revenueCalculate,
   getMonthlyRevenue,
+  findBookedAirlines,
+  findUserIdByTripId,
+  findById,
+  saveBooking,
+  countBookingsByAirline,
 };

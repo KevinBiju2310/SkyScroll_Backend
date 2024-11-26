@@ -84,7 +84,6 @@ const deleteTripUseCase = async (id) => {
 };
 
 const getFlightsUseCase = async (details) => {
-  console.log(details);
   const { fromAirport, toAirport, departureDate, returnDate, tripType } =
     details;
   const deptAirport = await airportRepositary.findByName(fromAirport);

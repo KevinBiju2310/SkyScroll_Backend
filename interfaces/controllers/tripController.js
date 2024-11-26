@@ -4,7 +4,7 @@ const {
   deleteTripUseCase,
   flightDetailsUseCase,
   createBookingUseCase,
-  getAllBookingsUseCase
+  getAllBookingsUseCase,
 } = require("../../application/useCases/tripAuth");
 
 const addTrips = async (req, res) => {

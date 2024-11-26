@@ -2,9 +2,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userRepositary = require("../../infrastructure/repositaries/userRepositary");
 const travellersRepositary = require("../../infrastructure/repositaries/travellersRepositary");
+const bookingRepositary = require("../../infrastructure/repositaries/bookingRepositary");
+const walletRepositary = require("../../infrastructure/repositaries/walletRepositary");
 const sendEmail = require("../../infrastructure/services/otpService");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const Conversation = require("../../infrastructure/repositaries/messageRepositary");
 
 const signUpUseCase = async (userdata) => {
   const { email, password } = userdata;
@@ -229,6 +233,73 @@ const getAllTravellersUseCase = async (id) => {
   return travellers;
 };
 
+const getBookedAirlinesUseCase = async (id) => {
+  const bookedAirlines = await bookingRepositary.findBookedAirlines(id);
+  const onlyAirlines = bookedAirlines.map(
+    (booking) => booking.flightId.airline
+  );
+  const uniqueAirlines = onlyAirlines.filter(
+    (airline, index, self) =>
+      index ===
+      self.findIndex((a) => a._id.toString() === airline._id.toString())
+  );
+  return uniqueAirlines;
+};
+
+const cancelBookingUseCase = async (id) => {
+  const findBooking = await bookingRepositary.findById(id);
+  if (!findBooking) {
+    throw new Error("Booking Id not found");
+  }
+  findBooking.bookingStatus = "CANCELLED";
+  findBooking.paymentStatus = "REFUNDED";
+  const updatedBooking = await bookingRepositary.saveBooking(findBooking);
+  const refundAmount = findBooking.totalAmount;
+  let userWallet = await walletRepositary.findByUserId(findBooking.userId);
+  if (!userWallet) {
+    const newWallet = {
+      userId: findBooking.userId,
+      balance: refundAmount,
+      transactions: [
+        {
+          amount: refundAmount,
+        },
+      ],
+    };
+    userWallet = await walletRepositary.createWallet(newWallet);
+  } else {
+    userWallet.balance += refundAmount;
+    userWallet.transactions.push({
+      amount: refundAmount,
+    });
+
+    await walletRepositary.updateWallet(userWallet._id, {
+      balance: userWallet.balance,
+      transactions: userWallet.transactions,
+    });
+  }
+  return updatedBooking;
+};
+
+const walletDetailsUseCase = async (id) => {
+  const walletDetails = await walletRepositary.findByUserId(id);
+  return walletDetails;
+};
+
+const messageUseCase = async (senderId, receiverId) => {
+  const conversation = await Conversation.findOne({
+    $or: [
+      { sender: senderId, receiver: receiverId },
+      { sender: receiverId, receiver: senderId },
+    ],
+  });
+  if (conversation) {
+    return conversation.messages;
+  } else {
+    return [];
+  }
+};
+
 module.exports = {
   signUpUseCase,
   signInUseCase,
@@ -244,4 +315,8 @@ module.exports = {
   changePasswordUseCase,
   addTravellersUseCase,
   getAllTravellersUseCase,
+  getBookedAirlinesUseCase,
+  cancelBookingUseCase,
+  walletDetailsUseCase,
+  messageUseCase,
 };
