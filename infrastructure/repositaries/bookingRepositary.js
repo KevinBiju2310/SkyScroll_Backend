@@ -213,33 +213,38 @@ const saveBooking = async (data) => {
   return updatedBooking;
 };
 
-const countBookingsByAirline = async(id) => {
-  return await bookingModel.aggregate([
-    {
-      $lookup:{
-        from: "trips",
-        localField: "flightId",
-        foreignField: "_id",
-        as:"flight"
-      }
-    },
-    {
-      $unwind: "$flight"
-    },
-    {
-      $match: {
-        "flight.airline": new mongoose.Types.ObjectId(id)
-      }
-    },
-    {
-      $count: "totalBookings"
-    }
-  ]).then(result=>{
-    if(result.length===0) return 0;
-    return result[0].totalBookings;
-  })
-}
+const countBookingsByAirline = async (id) => {
+  return await bookingModel
+    .aggregate([
+      {
+        $lookup: {
+          from: "trips",
+          localField: "flightId",
+          foreignField: "_id",
+          as: "flight",
+        },
+      },
+      {
+        $unwind: "$flight",
+      },
+      {
+        $match: {
+          "flight.airline": new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $count: "totalBookings",
+      },
+    ])
+    .then((result) => {
+      if (result.length === 0) return 0;
+      return result[0].totalBookings;
+    });
+};
 
+const findSeatsById = async (id) => {
+  return await bookingModel.find({ flightId: id }).select("selectedSeats");
+};
 
 module.exports = {
   createBooking,
@@ -254,4 +259,5 @@ module.exports = {
   findById,
   saveBooking,
   countBookingsByAirline,
+  findSeatsById,
 };

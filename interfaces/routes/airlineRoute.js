@@ -42,6 +42,7 @@ router.get("/airports", verifyTokenAirline, airportController.getAirports);
 
 router.post("/add-trips", verifyTokenAirline, tripController.addTrips);
 router.get("/trips", verifyTokenAirline, tripController.getAllTrips);
+router.put("/edit-trip/:id", verifyTokenAirline, tripController.updateTrip);
 router.delete("/trips/:id", verifyTokenAirline, tripController.deleteTrips);
 
 router.get("/bookings", verifyTokenAirline, airlineController.getBookings);

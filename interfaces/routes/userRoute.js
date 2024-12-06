@@ -37,6 +37,8 @@ router.put("/cancelbooking/:id", verifyToken, userController.cancelBooking);
 
 router.get("/wallet", verifyToken, userController.walletDetails);
 router.get("/messages/:id", verifyToken, userController.getMessages);
+router.get("/unread-messages", verifyToken, userController.getUnreadMessages);
+// router.get("/last-unread-message", verifyToken, userController.getLastUnreadMessage);
 
 router.post("/refresh-token", userController.getAccessToken);
 

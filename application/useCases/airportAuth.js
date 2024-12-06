@@ -21,10 +21,15 @@ const getSingleAirportUseCase = async (airportId) => {
 };
 
 const updateAirportUseCase = async (airportId, airportData) => {
+  const existingAirport = await airportRepositary.findName(airportData.name);
+  if(existingAirport && existingAirport._id !== airportId){
+    throw new Error("Airport Alerady in use")
+  }
   const updatedAirport = await airportRepositary.updateAirport(
     airportId,
     airportData
   );
+
   return updatedAirport;
 };
 

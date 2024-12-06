@@ -44,6 +44,9 @@ const SegmentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  duration: {
+    type: String,
+  },
   status: {
     type: String,
     enum: [
@@ -146,6 +149,10 @@ const countTripsByAirline = async (id) => {
   return await tripModel.countDocuments({ airline: id });
 };
 
+const updateTrip = async (id, data) => {
+  return await tripModel.findByIdAndUpdate(id, data);
+};
+
 module.exports = {
   createTrip,
   findAllTrips,
@@ -155,4 +162,5 @@ module.exports = {
   findAllTripsAdmin,
   findTripsByAirlineId,
   countTripsByAirline,
+  updateTrip,
 };

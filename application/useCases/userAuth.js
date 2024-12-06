@@ -300,6 +300,41 @@ const messageUseCase = async (senderId, receiverId) => {
   }
 };
 
+const unreadMessagesUseCase = async (id) => {
+  const conversations = await Conversation.find({
+    $or: [{ sender: id }, { receiver: id }],
+  });
+  const unreadCount = conversations.reduce((count, conv) => {
+    return (
+      count +
+      conv.messages.filter((msg) => msg.sender !== id && !msg.seen).length
+    );
+  }, 0);
+  return unreadCount;
+};
+
+// const lastUnreadMessageUseCase = async (id) => {
+//   const conversation = await Conversation.findOne({
+//     $or: [{ sender: id }, { receiver: id }],
+//     "messages.seen": false,
+//   })
+//     .sort({ updatedAt: -1 }) // Get the latest updated conversation
+//     .populate("sender", "airlineName") // Populate sender name
+//     .exec();
+//   if (!conversation) {
+//     return null; // No conversation with unread messages
+//   }
+
+//   const lastUnreadMessage = conversation.messages
+//     .filter((message) => !message.seen)
+//     .sort((a, b) => b.timestamp - a.timestamp)[0];
+//   if (!lastUnreadMessage) {
+//     return null; // No unread messages
+//   }
+//   console.log(conversation.sender, "nameee");
+//   return conversation.sender.airlineName;
+// };
+
 module.exports = {
   signUpUseCase,
   signInUseCase,
@@ -319,4 +354,6 @@ module.exports = {
   cancelBookingUseCase,
   walletDetailsUseCase,
   messageUseCase,
+  unreadMessagesUseCase,
+  // lastUnreadMessageUseCase,
 };

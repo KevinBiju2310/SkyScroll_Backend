@@ -118,12 +118,12 @@ const bookedUsersUseCase = async (id) => {
   const trips = await tripRepositary.findTripsByAirlineId(id);
   const tripIds = trips.map((trip) => trip._id);
   const bookings = await bookingRepositary.findUserIdByTripId(tripIds);
-  const user = bookings.map((booking) => booking.userId);
-  return user;
+  const uniqueUsers = [...new Set(bookings.map((booking) => booking.userId))];
+  return uniqueUsers;
 };
 
 const statisticsUseCase = async (id) => {
-  const totalAircraft = await aircraftRepositary.countAircraftByAirline(id);  
+  const totalAircraft = await aircraftRepositary.countAircraftByAirline(id);
   const totalBookings = await bookingRepositary.countBookingsByAirline(id);
   const totalTrips = await tripRepositary.countTripsByAirline(id);
   return { totalAircraft, totalBookings, totalTrips };

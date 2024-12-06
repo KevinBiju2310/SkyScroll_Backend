@@ -5,12 +5,12 @@ const {
   flightDetailsUseCase,
   createBookingUseCase,
   getAllBookingsUseCase,
+  updateTripUseCase,
 } = require("../../application/useCases/tripAuth");
 
 const addTrips = async (req, res) => {
   try {
     const userId = req.user.userId;
-    console.log(userId, req.body);
     const response = await addTripUseCase(userId, req.body);
     res.status(200).json({ response });
   } catch (error) {
@@ -66,6 +66,17 @@ const getBooking = async (req, res) => {
   }
 };
 
+const updateTrip = async (req, res) => {
+  try {
+    const tripId = req.params.id;
+    const updatedData = req.body;
+    const response = await updateTripUseCase(tripId, updatedData);
+    res.status(201).json({ response });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   addTrips,
   getAllTrips,
@@ -73,4 +84,5 @@ module.exports = {
   getFlights,
   createBooking,
   getBooking,
+  updateTrip,
 };

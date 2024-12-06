@@ -17,6 +17,8 @@ const {
   cancelBookingUseCase,
   walletDetailsUseCase,
   messageUseCase,
+  unreadMessagesUseCase,
+  // lastUnreadMessageUseCase,
 } = require("../../application/useCases/userAuth");
 const {
   getAirportsUseCase,
@@ -274,7 +276,6 @@ const searchFlight = async (req, res) => {
 
 const Payments = async (req, res) => {
   try {
-    console.log(req.body);
     const response = await paymentsUseCase(req.body);
     res.status(201).json({ success: true, response });
   } catch (error) {
@@ -319,9 +320,29 @@ const getMessages = async (req, res) => {
     const response = await messageUseCase(senderId, receiverId);
     res.status(201).json({ success: true, response });
   } catch (error) {
-    res.status.json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
+
+const getUnreadMessages = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const response = await unreadMessagesUseCase(userId);
+    res.status(201).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+// const getLastUnreadMessage = async (req, res) => {
+//   try {
+//     const userId = req.user.userId;
+//     const response = await lastUnreadMessageUseCase(userId);
+//     res.status(201).json({ success: true, response });
+//   } catch (error) {
+//     res.status(400).json({ success: false, error: error.message });
+//   }
+// };
 
 module.exports = {
   signUp,
@@ -346,4 +367,6 @@ module.exports = {
   cancelBooking,
   walletDetails,
   getMessages,
+  getUnreadMessages,
+  // getLastUnreadMessage,
 };

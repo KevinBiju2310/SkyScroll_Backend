@@ -81,6 +81,10 @@ const countAirports = async () => {
   return await airportModel.countDocuments();
 };
 
+const findName = async (name) => {
+  return await airportModel.findOne({ name: name });
+};
+
 module.exports = {
   createAirport,
   getAllAirports,
@@ -90,4 +94,5 @@ module.exports = {
   findById,
   findByCode,
   countAirports,
+  findName,
 };

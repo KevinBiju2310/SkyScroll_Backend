@@ -44,6 +44,7 @@ app.use("/admin", adminRoute);
 app.use("/airline", airlineRoute);
 
 const connectedUsers = new Map();
+const onlineUsers = new Set();
 
 io.on("connection", async (socket) => {
   // console.log("new client connected", socket);
@@ -51,7 +52,9 @@ io.on("connection", async (socket) => {
   socket.on("join", (userId) => {
     console.log("User joined:", userId);
     connectedUsers.set(socket.id, userId);
+    onlineUsers.add(userId);
     socket.join(userId);
+    io.emit("userOnline", userId);
   });
 
   socket.on("sendMessage", async (messageData) => {
@@ -92,9 +95,64 @@ io.on("connection", async (socket) => {
     }
   });
 
+  socket.on("markMessagesAsSeen", async ({ conversationId, userId }) => {
+    try {
+      const conversation = await Conversation.findOne({
+        $or: [
+          { sender: conversationId, receiver: userId },
+          { sender: userId, receiver: conversationId },
+        ],
+      });
+
+      if (conversation) {
+        await Conversation.updateOne(
+          {
+            _id: conversation._id,
+            "messages.sender": conversationId,
+            "messages.seen": false,
+          },
+          {
+            $set: {
+              "messages.$[elem].seen": true,
+            },
+          },
+          {
+            arrayFilters: [
+              { "elem.sender": conversationId, "elem.seen": false },
+            ],
+            multi: true,
+          }
+        );
+        io.to(conversationId).emit("messagesSeen", { by: userId });
+      }
+    } catch (error) {
+      console.error("Error marking messages as seen:", error);
+    }
+  });
+
   socket.on("disconnect", () => {
+    const userId = connectedUsers.get(socket.id);
     console.log("Client disconnected:", socket.id);
     connectedUsers.delete(socket.id);
+
+    let userOtherConnections = false;
+    connectedUsers.forEach((id) => {
+      if (id === userId) {
+        userOtherConnections = true;
+      }
+    });
+
+    if (!userOtherConnections) {
+      onlineUsers.delete(userId);
+      io.emit("userOffline", userId);
+    }
+  });
+
+  socket.on("checkOnlineStatus", (userId) => {
+    socket.emit("onlineStatus", {
+      userId,
+      isOnline: onlineUsers.has(userId),
+    });
   });
 });
 

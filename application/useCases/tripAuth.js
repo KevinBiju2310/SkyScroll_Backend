@@ -9,7 +9,6 @@ const stripe = require("stripe")(
 );
 
 const addTripUseCase = async (id, tripdetails) => {
-  console.log(tripdetails);
   const { isDirect, segments } = tripdetails;
   if (isDirect && segments.length !== 1) {
     throw new Error("Direct flights must have exactly one segment");
@@ -46,6 +45,17 @@ const addTripUseCase = async (id, tripdetails) => {
       const convertedArrivalTime = moment
         .tz(arrivalTime, arrivalAirportDoc.timezone)
         .utc();
+
+      const duration = moment.duration(
+        convertedArrivalTime.diff(convertedDepartureTime)
+      );
+      if (duration.asMinutes() <= 0) {
+        throw new Error("Arrival time must be after departure time");
+      }
+      const formattedDuration = `${Math.floor(
+        duration.asHours()
+      )}hr ${duration.minutes()}min`;
+      console.log(`Segment Duration: ${formattedDuration}`);
       return {
         ...segment,
         aircraft: AircraftDoc._id,
@@ -53,6 +63,7 @@ const addTripUseCase = async (id, tripdetails) => {
         arrivalAirport: arrivalAirportDoc._id,
         departureTime: convertedDepartureTime,
         arrivalTime: convertedArrivalTime,
+        duration: formattedDuration,
       };
     })
   );
@@ -130,7 +141,20 @@ const getFlightsUseCase = async (details) => {
 const flightDetailsUseCase = async (details) => {
   const { id } = details;
   const findFlight = await tripRepositary.findById(id);
-  return findFlight;
+  if (!findFlight) {
+    throw new Error("flight not found");
+  }
+  const bookedSeats = await bookingRepositary.findSeatsById(id);
+  const aggregatedSeats = bookedSeats.reduce((acc, booking) => {
+    for (const [key, value] of booking.selectedSeats.entries()) {
+      acc[key] = acc[key] ? [...acc[key], ...value] : value;
+    }
+    return acc;
+  }, {});
+  return {
+    flightDetails: findFlight,
+    bookedSeats: aggregatedSeats,
+  };
 };
 
 const paymentsUseCase = async (details) => {
@@ -139,8 +163,9 @@ const paymentsUseCase = async (details) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amount * 100,
     currency: "inr",
+    payment_method_types: ["card"],
   });
-  // console.log(paymentIntent);
+  // console.log(paymentIntent, "payments");
   const clientSecret = paymentIntent.client_secret;
   return clientSecret;
 };
@@ -167,7 +192,6 @@ const createBookingUseCase = async (details) => {
       const seat = seatingDetails.seats.find(
         (s) => s.seatNumber === seatNumber
       );
-      console.log(seat, "Seat");
       if (seat) {
         seat.status = "booked";
       } else {
@@ -195,6 +219,15 @@ const getAllBookingsUseCase = async (id) => {
   return allBookings;
 };
 
+const updateTripUseCase = async (id, details) => {
+  const findTrip = await tripRepositary.findById(id);
+  if (!findTrip) {
+    throw new Error("Trip not found");
+  }
+  const updatedTrip = await tripRepositary.updateTrip(id, details);
+  return updatedTrip;
+};
+
 module.exports = {
   addTripUseCase,
   getAllTripsUseCase,
@@ -204,4 +237,5 @@ module.exports = {
   paymentsUseCase,
   createBookingUseCase,
   getAllBookingsUseCase,
+  updateTripUseCase,
 };
