@@ -62,15 +62,15 @@ const signIn = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" && req.protocol === "https",
-      sameSite: "Strict",
+      secure: true, // Required for HTTPS
+      sameSite: "none",
       maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" && req.protocol === "https",
-      sameSite: "Strict",
+      secure: true, // Required for HTTPS
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.status(201).json({ success: true, data: response });
