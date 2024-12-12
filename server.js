@@ -10,6 +10,7 @@ const userRoute = require("./interfaces/routes/userRoute");
 const adminRoute = require("./interfaces/routes/adminRoute");
 const airlineRoute = require("./interfaces/routes/airlineRoute");
 const Conversation = require("./infrastructure/repositaries/messageRepositary");
+const Notification = require("./infrastructure/repositaries/notificationRepositary");
 
 const app = express();
 const server = http.createServer(app);
@@ -85,13 +86,63 @@ io.on("connection", async (socket) => {
       conversation.messages.push(newMessage);
       await conversation.save();
 
+      const notification = new Notification({
+        recipient: receiverId,
+        sender: senderId,
+        type: "MESSAGE",
+        content: text.length > 50 ? `${text.substring(0, 50)}...` : text,
+        conversationId: conversation._id,
+      });
+      await notification.save();
+
       io.to(senderId).emit("messageReceived", newMessage);
       io.to(receiverId).emit("messageReceived", newMessage);
+      io.to(receiverId).emit("newNotification", {
+        notificationId: notification._id,
+        type: "MESSAGE",
+        content: notification.content,
+        sender: senderId,
+        timestamp: notification.createdAt,
+      });
 
       console.log("Message sent to rooms:", senderId, receiverId);
     } catch (error) {
       console.error("Error occured: ", error);
       socket.emit("messageError", { error: "Failed to send message" });
+    }
+  });
+
+  socket.on("markNotificationAsRead", async ({ notificationId }) => {
+    try {
+      const notification = await Notification.findByIdAndUpdate(
+        notificationId,
+        { read: true },
+        { new: true }
+      );
+
+      if (notification) {
+        io.to(notification.recipient.toString()).emit(
+          "notificationRead",
+          notificationId
+        );
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  });
+
+  socket.on("getUnreadNotifications", async (userId) => {
+    try {
+      const unreadNotifications = await Notification.find({
+        recipient: userId,
+        read: false,
+      })
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+      socket.emit("unreadNotifications", unreadNotifications);
+    } catch (error) {
+      console.error("Error fetching unread notifications:", error);
     }
   });
 
@@ -123,7 +174,19 @@ io.on("connection", async (socket) => {
             multi: true,
           }
         );
+
+        await Notification.updateMany(
+          {
+            recipient: userId,
+            sender: conversationId,
+            conversationId: conversation._id,
+            read: false,
+          },
+          { read: true }
+        );
+
         io.to(conversationId).emit("messagesSeen", { by: userId });
+        io.to(userId).emit("notificationsCleared", { conversationId });
       }
     } catch (error) {
       console.error("Error marking messages as seen:", error);

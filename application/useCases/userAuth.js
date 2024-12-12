@@ -36,6 +36,9 @@ const signInUseCase = async (userdata) => {
   if (!user || !passwordMatch) {
     throw new Error("Incorrect Email or password");
   }
+  if (!user.isVerified) {
+    throw new Error("User is not verified");
+  }
   if (user.isBlocked) {
     throw new Error("User is Blocked");
   }
@@ -70,12 +73,10 @@ const updatePassportUseCase = async (id, updatedData) => {
       expiryDate: updatedData.expiryDate || user.passportDetails?.expiryDate,
     },
   };
-  console.log(updatedPassportDetails);
   const updatedPassport = await userRepositary.updateUserProfile(
     id,
     updatedPassportDetails
   );
-  console.log(updatedPassport, "passport-dta");
   return updatedPassport;
 };
 

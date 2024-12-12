@@ -22,8 +22,11 @@ const getSingleAirportUseCase = async (airportId) => {
 
 const updateAirportUseCase = async (airportId, airportData) => {
   const existingAirport = await airportRepositary.findName(airportData.name);
-  if(existingAirport && existingAirport._id !== airportId){
-    throw new Error("Airport Alerady in use")
+  if (
+    existingAirport &&
+    existingAirport._id.toString() !== airportId.toString()
+  ) {
+    throw new Error("Airport already in use");
   }
   const updatedAirport = await airportRepositary.updateAirport(
     airportId,

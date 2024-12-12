@@ -163,7 +163,10 @@ const paymentsUseCase = async (details) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amount * 100,
     currency: "inr",
-    payment_method_types: ["card"],
+    // payment_method_types: ["card"],
+    automatic_payment_methods: {
+      enabled: true,
+    },
   });
   // console.log(paymentIntent, "payments");
   const clientSecret = paymentIntent.client_secret;
@@ -171,7 +174,7 @@ const paymentsUseCase = async (details) => {
 };
 
 const createBookingUseCase = async (details) => {
-  // console.log(details)
+  console.log(details);
   const { flightId, user, selectedSeats, travelClass } = details;
   const checkFlight = await tripRepositary.findById(flightId);
   if (!checkFlight) {
