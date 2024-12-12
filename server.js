@@ -26,7 +26,7 @@ app.use(
   cors({
     origin: "https://skyscroll-frontend.onrender.com",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
