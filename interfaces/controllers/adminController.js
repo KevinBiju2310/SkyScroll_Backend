@@ -6,7 +6,7 @@ const {
   toggleAirlineStatusUseCase,
   getAllBookingsUseCase,
   getAllTripsUseCase,
-  getDashboardDetailsUseCase
+  getDashboardDetailsUseCase,
 } = require("../../application/useCases/adminAuth");
 const jwt = require("jsonwebtoken");
 
@@ -33,15 +33,15 @@ const signIn = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+      secure: true,
+      sameSite: "none",
       maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.status(201).json({ success: true, data: response });
@@ -108,14 +108,14 @@ const getAllTrips = async (req, res) => {
   }
 };
 
-const getDashboardDetails = async(req,res) => {
-  try{
+const getDashboardDetails = async (req, res) => {
+  try {
     const response = await getDashboardDetailsUseCase();
-    res.status(200).json({success:true, response})
-  }catch(error){
-    res.status(400).json({success:false, error:error.message})
+    res.status(200).json({ success: true, response });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
   }
-}
+};
 
 module.exports = {
   signIn,
@@ -125,5 +125,5 @@ module.exports = {
   toggleAirlineStatus,
   getAllBookings,
   getAllTrips,
-  getDashboardDetails
+  getDashboardDetails,
 };
