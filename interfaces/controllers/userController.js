@@ -235,11 +235,11 @@ const getAllTravellers = async (req, res) => {
 const getAccessToken = (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
-    return res.status(403).json({ message: "Refresh token not found" });
+    return res.status(404).json({ message: "Refresh token not found" });
   }
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+      return res.status(400).json({ message: "Invalid refresh token" });
     }
     const newAccessToken = jwt.sign(
       { userId: user.userId },
