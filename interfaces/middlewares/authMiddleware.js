@@ -3,6 +3,7 @@ const userRepositary = require("../../infrastructure/repositaries/userRepositary
 
 const verifyToken = async (req, res, next) => {
   const token = req.cookies.accessToken;
+  console.log(token, "token-established");
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
   }
@@ -11,9 +12,7 @@ const verifyToken = async (req, res, next) => {
     req.user = decoded;
     const user = await userRepositary.findById(req.user.userId);
     if (user.isBlocked) {
-      return res
-        .status(403)
-        .json({ message: "Your account has been blocked" });
+      return res.status(403).json({ message: "Your account has been blocked" });
     }
     next();
   } catch (err) {
