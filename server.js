@@ -16,7 +16,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: ["https://skyscroll.live", "https://www.skyscroll.live"],
+    origin: [
+      "https://skyscroll.live",
+      "https://www.skyscroll.live",
+      "https://skyscroll-backend.onrender.com",
+    ],
     credentials: true,
   },
 });
