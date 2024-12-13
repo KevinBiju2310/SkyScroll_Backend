@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: "https://skyscroll-frontend.onrender.com",
+    origin: "https://skyscroll.live",
     credentials: true,
   },
 });
@@ -24,7 +24,7 @@ const io = socketIO(server, {
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://skyscroll-frontend.onrender.com",
+    origin: "https://skyscroll.live",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
