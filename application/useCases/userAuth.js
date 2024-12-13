@@ -173,7 +173,7 @@ const forgotPasswordUseCase = async (emailDetails) => {
   const resetToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
+  const resetLink = `https://skyscroll.live/reset-password?token=${resetToken}`;
   await sendEmail(
     user.email,
     "Password Reset Request",
